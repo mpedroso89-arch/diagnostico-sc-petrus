@@ -1156,12 +1156,19 @@ function closeHistorico(e) {
 }
 
 function atFetchAll(cb) {
-  var url = 'https://api.airtable.com/v0/' + AT_BASE + '/' + AT_TABLE;
-  url += '?sort%5B0%5D%5Bfield%5D=In%C3%ADcio&sort%5B0%5D%5Bdirection%5D=desc&pageSize=100';
+  var url = 'https://api.airtable.com/v0/' + AT_BASE + '/' + AT_TABLE + '?pageSize=100';
   fetch(url, {
     headers: { 'Authorization': 'Bearer ' + AT_TOKEN }
   }).then(function(r){ return r.json(); })
-    .then(function(d){ cb(d.records || []); })
+    .then(function(d){
+      if (d.error) { console.warn('Airtable error:', d.error); cb([]); return; }
+      var recs = (d.records || []).sort(function(a,b){
+        var da = a.fields['Início'] ? new Date(a.fields['Início']) : 0;
+        var db = b.fields['Início'] ? new Date(b.fields['Início']) : 0;
+        return db - da;
+      });
+      cb(recs);
+    })
     .catch(function(e){ console.warn('Airtable fetchAll:', e); cb([]); });
 }
 
