@@ -690,6 +690,10 @@ body{background:var(--bg);color:var(--white);font-family:'Segoe UI',system-ui,-a
 </div><!-- /wrap -->
 
 <script>
+window.onerror = function(msg, src, line, col, err) {
+  alert('ERRO JS na página:\n' + msg + '\nLinha: ' + line);
+  return false;
+};
 // =====================================================================
 // DADOS
 // =====================================================================
@@ -1829,4 +1833,18 @@ updateHistCount();
     <p>Acesso restrito. Informe suas credenciais.</p>
     <div class="login-field">
       <label>Usuário</label>
-      <input type="text" id="loginUser" placeholder="usuário" autoco
+      <input type="text" id="loginUser" placeholder="usuário" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPwd').focus()" />
+    </div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="loginPwd" placeholder="senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <div class="login-err" id="loginErr">Usuário ou senha incorretos.</div>
+    <div class="login-actions">
+      <button class="btn btn-p" onclick="doLogin()" style="flex:1;">Entrar</button>
+      <button class="btn btn-s" onclick="closeLogin()">Cancelar</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
