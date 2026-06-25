@@ -1159,25 +1159,30 @@ function atFetchAll(cb) {
   var url = 'https://api.airtable.com/v0/' + AT_BASE + '/' + AT_TABLE + '?pageSize=100';
   fetch(url, {
     headers: { 'Authorization': 'Bearer ' + AT_TOKEN }
-  }).then(function(r){ return r.json(); })
-    .then(function(d){
-      if (d.error) {
-        var el = document.getElementById('dashBody');
-        if (el) el.innerHTML = '<div style="color:#f87171;padding:20px;font-family:monospace">Erro Airtable: ' + JSON.stringify(d.error) + '</div>';
-        cb([]); return;
-      }
-      var recs = (d.records || []).sort(function(a,b){
-        var da = a.fields['Início'] ? new Date(a.fields['Início']) : 0;
-        var db = b.fields['Início'] ? new Date(b.fields['Início']) : 0;
-        return db - da;
-      });
-      cb(recs);
-    })
-    .catch(function(e){
-      var el = document.getElementById('dashBody');
-      if (el) el.innerHTML = '<div style="color:#f87171;padding:20px;font-family:monospace">Erro conexão: ' + e.message + '</div>';
-      cb([]);
+  }).then(function(r){
+    var status = r.status;
+    return r.json().then(function(d){ return {s: status, d: d}; });
+  }).then(function(res){
+    var d = res.d; var s = res.s;
+    var el = document.getElementById('dashBody');
+    if (s !== 200 || d.error) {
+      if (el) el.innerHTML = '<div style="color:#f87171;padding:20px;font-family:monospace">HTTP ' + s + '<br>' + JSON.stringify(d) + '</div>';
+      cb([]); return;
+    }
+    if (el && (!d.records || d.records.length === 0)) {
+      el.innerHTML = '<div style="color:#fbbf24;padding:20px;font-family:monospace">API OK mas retornou 0 registros.<br>Token: ' + AT_TOKEN.substring(0,10) + '...<br>Base: ' + AT_BASE + '</div>';
+    }
+    var recs = (d.records || []).sort(function(a,b){
+      var da = a.fields['Início'] ? new Date(a.fields['Início']) : 0;
+      var db = b.fields['Início'] ? new Date(b.fields['Início']) : 0;
+      return db - da;
     });
+    cb(recs);
+  }).catch(function(e){
+    var el = document.getElementById('dashBody');
+    if (el) el.innerHTML = '<div style="color:#f87171;padding:20px;font-family:monospace">Erro conexão: ' + e.message + '</div>';
+    cb([]);
+  });
 }
 
 function loadDashboard() {
