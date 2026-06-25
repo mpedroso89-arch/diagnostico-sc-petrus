@@ -1164,13 +1164,12 @@ function atFetchAll(cb) {
     return r.json().then(function(d){ return {s: status, d: d}; });
   }).then(function(res){
     var d = res.d; var s = res.s;
-    var el = document.getElementById('dashBody');
     if (s !== 200 || d.error) {
-      if (el) el.innerHTML = '<div style="color:#f87171;padding:20px;font-family:monospace">HTTP ' + s + '<br>' + JSON.stringify(d) + '</div>';
+      alert('ERRO Airtable: HTTP ' + s + '\n' + JSON.stringify(d).substring(0, 400));
       cb([]); return;
     }
-    if (el && (!d.records || d.records.length === 0)) {
-      el.innerHTML = '<div style="color:#fbbf24;padding:20px;font-family:monospace">API OK mas retornou 0 registros.<br>Token: ' + AT_TOKEN.substring(0,10) + '...<br>Base: ' + AT_BASE + '</div>';
+    if (!d.records || d.records.length === 0) {
+      alert('API OK (HTTP ' + s + ') mas retornou 0 registros.\nToken início: ' + AT_TOKEN.substring(0,18) + '\nBase: ' + AT_BASE + '\nTabela: ' + AT_TABLE);
     }
     var recs = (d.records || []).sort(function(a,b){
       var da = a.fields['Início'] ? new Date(a.fields['Início']) : 0;
@@ -1179,8 +1178,7 @@ function atFetchAll(cb) {
     });
     cb(recs);
   }).catch(function(e){
-    var el = document.getElementById('dashBody');
-    if (el) el.innerHTML = '<div style="color:#f87171;padding:20px;font-family:monospace">Erro conexão: ' + e.message + '</div>';
+    alert('ERRO conexão Airtable: ' + e.message);
     cb([]);
   });
 }
@@ -1831,18 +1829,4 @@ updateHistCount();
     <p>Acesso restrito. Informe suas credenciais.</p>
     <div class="login-field">
       <label>Usuário</label>
-      <input type="text" id="loginUser" placeholder="usuário" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPwd').focus()" />
-    </div>
-    <div class="login-field">
-      <label>Senha</label>
-      <input type="password" id="loginPwd" placeholder="senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" />
-    </div>
-    <div class="login-err" id="loginErr">Usuário ou senha incorretos.</div>
-    <div class="login-actions">
-      <button class="btn btn-p" onclick="doLogin()" style="flex:1;">Entrar</button>
-      <button class="btn btn-s" onclick="closeLogin()">Cancelar</button>
-    </div>
-  </div>
-</div>
-</body>
-</html>
+      <input type="text" id="loginUser" placeholder="usuário" autoco
