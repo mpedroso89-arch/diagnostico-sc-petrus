@@ -1161,7 +1161,11 @@ function atFetchAll(cb) {
     headers: { 'Authorization': 'Bearer ' + AT_TOKEN }
   }).then(function(r){ return r.json(); })
     .then(function(d){
-      if (d.error) { console.warn('Airtable error:', d.error); cb([]); return; }
+      if (d.error) {
+        var el = document.getElementById('dashBody');
+        if (el) el.innerHTML = '<div style="color:#f87171;padding:20px;font-family:monospace">Erro Airtable: ' + JSON.stringify(d.error) + '</div>';
+        cb([]); return;
+      }
       var recs = (d.records || []).sort(function(a,b){
         var da = a.fields['Início'] ? new Date(a.fields['Início']) : 0;
         var db = b.fields['Início'] ? new Date(b.fields['Início']) : 0;
@@ -1169,7 +1173,11 @@ function atFetchAll(cb) {
       });
       cb(recs);
     })
-    .catch(function(e){ console.warn('Airtable fetchAll:', e); cb([]); });
+    .catch(function(e){
+      var el = document.getElementById('dashBody');
+      if (el) el.innerHTML = '<div style="color:#f87171;padding:20px;font-family:monospace">Erro conexão: ' + e.message + '</div>';
+      cb([]);
+    });
 }
 
 function loadDashboard() {
