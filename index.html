@@ -690,10 +690,6 @@ body{background:var(--bg);color:var(--white);font-family:'Segoe UI',system-ui,-a
 </div><!-- /wrap -->
 
 <script>
-window.onerror = function(msg, src, line, col, err) {
-  alert('ERRO JS na página:\n' + msg + '\nLinha: ' + line);
-  return false;
-};
 // =====================================================================
 // DADOS
 // =====================================================================
@@ -1168,12 +1164,10 @@ function atFetchAll(cb) {
     return r.json().then(function(d){ return {s: status, d: d}; });
   }).then(function(res){
     var d = res.d; var s = res.s;
+    var el = document.getElementById('dashBody');
     if (s !== 200 || d.error) {
-      alert('ERRO Airtable: HTTP ' + s + '\n' + JSON.stringify(d).substring(0, 400));
+      if (el) el.innerHTML = '<div style="color:#f87171;padding:20px;font-family:monospace">Erro ao carregar dados (HTTP ' + s + '). Tente novamente.</div>';
       cb([]); return;
-    }
-    if (!d.records || d.records.length === 0) {
-      alert('API OK (HTTP ' + s + ') mas retornou 0 registros.\nToken início: ' + AT_TOKEN.substring(0,18) + '\nBase: ' + AT_BASE + '\nTabela: ' + AT_TABLE);
     }
     var recs = (d.records || []).sort(function(a,b){
       var da = a.fields['Início'] ? new Date(a.fields['Início']) : 0;
@@ -1182,7 +1176,8 @@ function atFetchAll(cb) {
     });
     cb(recs);
   }).catch(function(e){
-    alert('ERRO conexão Airtable: ' + e.message);
+    var el = document.getElementById('dashBody');
+    if (el) el.innerHTML = '<div style="color:#f87171;padding:20px;font-family:monospace">Erro de conexão. Tente novamente.</div>';
     cb([]);
   });
 }
